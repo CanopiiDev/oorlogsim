@@ -1,0 +1,94 @@
+# ============================================================
+#  OorlogSim — hoofdconfig
+#  Na wijzigen: /os admin reload
+# ============================================================
+
+# Namen van de Multiverse-werelden
+worlds:
+  lobby: os_lobby        # OS-lobby
+  maps: os_maps          # Alle OS-maps staan in deze ene wereld
+  kitpvp: kitpvp         # KitPvP (FFA)
+
+# De twee kingdoms. KD1/KD2 zijn de namen die je in commando's gebruikt.
+# Kleuren: MiniMessage-kleurnaam (blue, green, red, gold, ...) of hex (#3366ff)
+teams:
+  KD1:
+    name: Merovia
+    color: blue
+    join-item: BLUE_WOOL
+    # Prefix in TAB-lijst en boven het hoofd (legacy &-codes, zoals TAB gebruikt)
+    tab-prefix: "&9[Merovia] "
+    nametag-prefix: "&9"
+  KD2:
+    name: Eldoria
+    color: green
+    join-item: GREEN_WOOL
+    tab-prefix: "&a[Eldoria] "
+    nametag-prefix: "&a"
+
+lobby:
+  # Slots in de hotbar (0-8)
+  items:
+    KD1-slot: 2
+    KD2-slot: 6
+    vote:
+      enabled: true
+      slot: 4
+      material: PAPER
+  # Inventory van spelers in de lobby leeg maken bij binnenkomst
+  clear-inventory: true
+  # Honger en schade uit in de lobby
+  invulnerable: true
+
+os:
+  countdown-seconds: 30
+  # Minimaal aantal spelers per team om te starten
+  min-players-per-team: 1
+  # Spelers zonder team: SMALLEST (bij kleinste team) of RANDOM
+  auto-assign: SMALLEST
+  # Mapkeuze: VOTE of RANDOM
+  map-selection: VOTE
+  friendly-fire: false
+  allow-block-break: false
+  allow-block-place: false
+  hunger: true
+  # Uitloggen/wereld verlaten = dood. Wie je in de laatste X seconden raakte krijgt de kill.
+  combat-tag-seconds: 10
+  # Weergave damage in stats: HEARTS of HP
+  damage-display: HEARTS
+  # Top 3 meeste kills tonen na het potje
+  show-top: true
+  top-size: 3
+  # Seconden na het einde voordat iedereen terug naar de lobby gaat
+  end-delay-seconds: 5
+  # Maximale duur in seconden (0 = geen limiet)
+  max-duration-seconds: 0
+  # Teamchat volledig afschermen: OS-spelers zien de rest van de server niet en andersom
+  isolate-chat: true
+  # Titels en geluiden
+  titles: true
+  sounds:
+    countdown: BLOCK_NOTE_BLOCK_HAT
+    start: ENTITY_ENDER_DRAGON_GROWL
+    win: UI_TOAST_CHALLENGE_COMPLETE
+  # Countdown-meldingen op deze seconden (en elke seconde onder de 5)
+  announce-at: [30, 20, 10, 5, 4, 3, 2, 1]
+
+kitpvp:
+  # Leven terug bij een kill
+  heal-on-kill: false
+  allow-block-break: false
+  allow-block-place: false
+  hunger: true
+  # Killstreak-melding naar de hele KitPvP-wereld vanaf deze streak (0 = uit)
+  announce-streak-from: 5
+
+leaderboards:
+  size: 10
+  refresh-seconds: 60
+  # Regelafstand tussen regels van het zwevende bord
+  line-width: 200
+
+# Inventory van spelers opslaan bij binnenkomst in een OorlogSim-wereld
+# en terugzetten bij verlaten. Aanbevolen: aan laten.
+protect-inventories: true

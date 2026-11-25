@@ -1,0 +1,90 @@
+# ============================================================
+#  OorlogSim — 1.8 spam-PvP
+#  Geldt alleen in de werelden hieronder. Na wijzigen: /os admin reload
+# ============================================================
+enabled: true
+
+# Werelden waar 1.8-PvP geldt. 'maps' en 'kitpvp' verwijzen naar config.yml > worlds.
+# Je mag ook gewone wereldnamen toevoegen.
+worlds: [maps, kitpvp]
+
+# Geen aanval-cooldown: hoge attack speed (vanilla = 4.0)
+attack-speed: 1024.0
+
+# Hit delay: hoeveel ticks iemand onkwetsbaar is na een hit.
+# Minecraft telt dit dubbel: 20 = 10 ticks echte delay (1.8-standaard).
+hit-delay-ticks: 20
+
+knockback:
+  enabled: true
+  horizontal: 0.4
+  vertical: 0.4
+  # Extra horizontale knockback bij sprinten / knockback-enchant per level
+  extra-horizontal: 0.5
+  extra-vertical: 0.1
+  # Maximale verticale snelheid na knockback
+  vertical-limit: 0.4
+  # Hoeveel van de huidige beweging behouden blijft (1.8: 2.0 = halveren)
+  friction: 2.0
+  # Knockback-resistance (bijv. netherite) negeren
+  ignore-resistance: true
+
+# Wapenschade (BASE-schade zonder enchantments/kracht). Item niet in de lijst = vanilla.
+weapon-damage:
+  enabled: true
+  values:
+    WOODEN_SWORD: 5.0
+    GOLDEN_SWORD: 5.0
+    STONE_SWORD: 6.0
+    IRON_SWORD: 7.0
+    DIAMOND_SWORD: 8.0
+    NETHERITE_SWORD: 9.0
+    WOODEN_AXE: 4.0
+    GOLDEN_AXE: 4.0
+    STONE_AXE: 5.0
+    IRON_AXE: 6.0
+    DIAMOND_AXE: 7.0
+    NETHERITE_AXE: 8.0
+    WOODEN_PICKAXE: 3.0
+    GOLDEN_PICKAXE: 3.0
+    STONE_PICKAXE: 4.0
+    IRON_PICKAXE: 5.0
+    DIAMOND_PICKAXE: 6.0
+    NETHERITE_PICKAXE: 7.0
+    WOODEN_SHOVEL: 2.0
+    GOLDEN_SHOVEL: 2.0
+    STONE_SHOVEL: 3.0
+    IRON_SHOVEL: 4.0
+    DIAMOND_SHOVEL: 5.0
+    NETHERITE_SHOVEL: 6.0
+
+# Sweep-aanvallen (zwaard raakt meerdere spelers)
+disable-sweep: true
+# Schilden blokkeren (niet te gebruiken)
+disable-shields: true
+# Offhand blokkeren
+disable-offhand: true
+
+# Crits: LEGACY = crit ook tijdens sprinten (zoals 1.8), VANILLA = 1.9+ regels
+crits: LEGACY
+# Crit-vermenigvuldiger
+crit-multiplier: 1.5
+
+regeneration:
+  # LEGACY = vast interval zoals 1.8, VANILLA = snelle 1.9+ regen
+  mode: LEGACY
+  interval-ticks: 80
+  amount: 1.0
+  min-food-level: 18
+  exhaustion: 3.0
+
+cooldowns:
+  # In seconden, 0 = geen cooldown
+  golden-apple: 0
+  enchanted-golden-apple: 0
+  ender-pearl: 0
+
+golden-apple:
+  # LEGACY = 1.8-effecten (regen II 5s, absorption 2 min), VANILLA = huidige
+  mode: LEGACY
+  enchanted-mode: LEGACY
