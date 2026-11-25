@@ -1,0 +1,27 @@
+name: OorlogSim
+version: '${version}'
+main: nl.oorlogsim.OorlogSim
+api-version: '26.2'
+description: Oorlog Simulatie (Merovia vs Eldoria) en KitPvP
+softdepend: [TAB, PlaceholderAPI, Multiverse-Core]
+commands:
+  os:
+    description: OorlogSim commando's
+    aliases: [oorlogsim]
+    usage: /os help
+permissions:
+  oorlogsim.admin:
+    description: Alle admin-commando's van OorlogSim
+    default: op
+  oorlogsim.lobby:
+    description: /os lobby
+    default: true
+  oorlogsim.kitpvp:
+    description: /os kitpvp
+    default: true
+  oorlogsim.stats:
+    description: /os stats
+    default: true
+  oorlogsim.bypass.inventory:
+    description: Inventory wordt niet opgeslagen/vervangen in OorlogSim-werelden
+    default: false
