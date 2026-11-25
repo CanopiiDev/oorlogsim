@@ -49,6 +49,11 @@ public final class WorldListener implements Listener {
         if (from == WorldRole.OTHER && to.isPluginWorld() && protect(p, from, to)) {
             plugin.snapshots().saveIfAbsent(p);
         }
+        // Lobby en KitPvP vervangen altijd de inventory: zorg dat er dan een snapshot is
+        // (ook als iemand met bypass via de maps-wereld binnenkomt).
+        if ((to == WorldRole.LOBBY || to == WorldRole.KITPVP) && plugin.cfg().protectInventories) {
+            plugin.snapshots().saveIfAbsent(p);
+        }
         if (to == WorldRole.OTHER && from.isPluginWorld()) {
             plugin.snapshots().restore(p);
         }
