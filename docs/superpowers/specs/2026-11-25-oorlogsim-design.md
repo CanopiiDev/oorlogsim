@@ -145,7 +145,7 @@ Alleen maps waarvan **beide** spawns gezet zijn en die aan staan (`enabled`) doe
 
 ## 7c. Leaderboards (all-time)
 
-- Blijvende stats per speler (UUID + laatst bekende naam): `os-kills`, `os-wins`, `os-damage`, `os-games`, `kitpvp-kills`, `kitpvp-deaths`, `kitpvp-best-streak`. Opslag in SQLite (`stats.db`), asynchroon geschreven.
+- Blijvende stats per speler (UUID + laatst bekende naam): `os-kills`, `os-wins`, `os-damage`, `os-games`, `kitpvp-kills`, `kitpvp-deaths`, `kitpvp-best-streak`. Opslag in `stats.yml` (in het geheugen, periodiek en bij afsluiten asynchroon weggeschreven).
 - Leaderboard-types: `top-kills` (OS), `top-wins` (OS), `top-damage` (OS), `kitpvp-kills`, `kitpvp-streak`.
 - `/os admin setleaderboard <type> [id]` — zwevende tekst (TextDisplay-entity, geen extra plugin) op je huidige positie. `/os admin removeleaderboard <id>`, `/os admin leaderboards` (lijst). Opgeslagen in `leaderboards.yml`, opnieuw opgebouwd bij herstart.
 - Top-N instelbaar (`leaderboards.size: 10`), verversen elke `leaderboards.refresh-seconds: 60`, opmaak (titel, regels, kleuren) in `messages.yml`.
@@ -187,7 +187,7 @@ Tab-completion voor alle commando's en mapnamen.
 - `playerdata/` — opgeslagen inventories.
 - `pvp.yml` — alle 1.8-PvP-instellingen.
 - `leaderboards.yml` — geplaatste leaderboards.
-- `stats.db` — all-time stats (SQLite).
+- `stats.yml` — all-time stats.
 
 ## 10. Integraties
 

@@ -95,7 +95,6 @@ lobby:
   countdown-title: "<gold>{seconds}"
   countdown-cancelled: "{prefix}<red>Countdown afgebroken: niet genoeg spelers per team."
   countdown-already: "{prefix}<gray>De countdown loopt al."
-  team-teamchanged-during-match: "{prefix}<red>Je kunt nu geen team kiezen."
 
 match:
   started: "{prefix}<gold><bold>De oorlog is begonnen!</bold></gold> <gray>Map: <yellow>{map}"
@@ -105,7 +104,7 @@ match:
   died: "{prefix}{victim} <gray>is gestorven."
   left: "{prefix}{victim} <gray>heeft de oorlog verlaten."
   you-are-spectator: "{prefix}<gray>Je bent dood en kijkt nu mee als spectator."
-  team-chat-format: "{team} <white>{player}</white><dark_gray>:</dark_gray> "
+  team-chat-prefix: "<dark_gray>[</dark_gray>{team}<dark_gray>]</dark_gray> "
   win: "{prefix}<gold><bold>{team} <gold><bold>heeft de oorlog gewonnen!"
   win-title: "{team}"
   win-subtitle: "<gold>wint de oorlog!"

@@ -1,6 +1,5 @@
 plugins {
     java
-    id("com.gradleup.shadow") version "9.2.2"
 }
 
 group = "nl.oorlogsim"
@@ -21,7 +20,6 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.135-stable")
     compileOnly("com.github.NEZNAMY:TAB-API:6.1.2")
     compileOnly("me.clip:placeholderapi:2.12.3")
-    implementation("org.xerial:sqlite-jdbc:3.54.1.0")
 
     testImplementation(platform("org.junit:junit-bom:5.13.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -35,9 +33,4 @@ tasks {
         filteringCharset = "UTF-8"
         filesMatching("plugin.yml") { expand("version" to project.version) }
     }
-    shadowJar {
-        archiveClassifier.set("")
-    }
-    jar { enabled = false }
-    build { dependsOn(shadowJar) }
 }
