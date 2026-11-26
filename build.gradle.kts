@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "nl.oorlogsim"
-version = "1.0.0"
+version = "1.1.0"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(25))
@@ -14,12 +14,15 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.extendedclip.com/releases/")
     maven("https://jitpack.io")
+    maven("https://maven.enginehub.org/repo/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.135-stable")
     compileOnly("com.github.NEZNAMY:TAB-API:6.1.2")
     compileOnly("me.clip:placeholderapi:2.12.3")
+    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.6") { isTransitive = false }
+    compileOnly("com.sk89q.worldedit:worldedit-core:7.4.6") { isTransitive = false }
 
     testImplementation(platform("org.junit:junit-bom:5.13.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
