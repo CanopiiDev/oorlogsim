@@ -35,6 +35,11 @@ public final class MapRegistry {
                 StoredLocation loc = StoredLocation.read(sec.getConfigurationSection("spawns." + t.name()));
                 if (loc != null) map.spawn(t, loc);
             }
+            ConfigurationSection rs = sec.getConfigurationSection("region");
+            if (rs != null && rs.contains("world")) {
+                map.region(new Region(rs.getString("world"), rs.getInt("min-x"), rs.getInt("min-y"), rs.getInt("min-z"),
+                        rs.getInt("max-x"), rs.getInt("max-y"), rs.getInt("max-z")));
+            }
             maps.put(key(id), map);
         }
     }
@@ -47,6 +52,17 @@ public final class MapRegistry {
             file.yml().set(base + ".enabled", map.enabled());
             for (Map.Entry<TeamId, StoredLocation> e : map.spawns().entrySet()) {
                 e.getValue().write(file.yml().createSection(base + ".spawns." + e.getKey().name()));
+            }
+            Region r = map.region();
+            if (r != null) {
+                String rb = base + ".region.";
+                file.yml().set(rb + "world", r.world());
+                file.yml().set(rb + "min-x", r.minX());
+                file.yml().set(rb + "min-y", r.minY());
+                file.yml().set(rb + "min-z", r.minZ());
+                file.yml().set(rb + "max-x", r.maxX());
+                file.yml().set(rb + "max-y", r.maxY());
+                file.yml().set(rb + "max-z", r.maxZ());
             }
         }
         file.save();
@@ -77,8 +93,8 @@ public final class MapRegistry {
         return Collections.unmodifiableCollection(maps.values());
     }
 
-    /** Maps die aan staan en waarvan beide spawns gezet zijn. */
-    public List<GameMap> playable() {
-        return maps.values().stream().filter(m -> m.enabled() && m.isReady()).toList();
+    /** Maps die aan staan, klaar zijn en niet bezig zijn met terugzetten. */
+    public List<GameMap> playable(boolean requireRegion, java.util.function.Predicate<GameMap> busy) {
+        return maps.values().stream().filter(m -> m.enabled() && m.isReady(requireRegion) && !busy.test(m)).toList();
     }
 }

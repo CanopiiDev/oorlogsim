@@ -22,6 +22,7 @@ help-admin:
   - "<yellow>/os admin maps</yellow> <gray>- overzicht van alle maps"
   - "<yellow>/os admin map create|delete|enable|disable|rename</yellow>"
   - "<yellow>/os admin setspawn <map> <KD1|KD2></yellow>"
+  - "<yellow>/os admin setregion <map></yellow> <gray>(FAWE-selectie) / <yellow>clearregion <map></yellow> / <yellow>restore <map></yellow>"
   - "<yellow>/os admin tp <map> <KD1|KD2></yellow>"
   - "<yellow>/os admin setlobby</yellow> / <yellow>setbutton</yellow>"
   - "<yellow>/os admin setkit <os|kitpvp></yellow> / <yellow>givekit</yellow>"
@@ -67,6 +68,7 @@ admin:
   overview-lore:
     - "<gray>KD1 ({team1}): {kd1}"
     - "<gray>KD2 ({team2}): {kd2}"
+    - "<gray>Gebied: {region}"
     - "<gray>Status: {enabled}"
     - ""
     - "<yellow>Linksklik</yellow><gray>: tp naar KD1"
@@ -77,6 +79,18 @@ admin:
   overview-check: "<green>✔"
   overview-cross: "<red>✘"
   teleported: "{prefix}<green>Geteleporteerd."
+  overview-restoring: "<gold>Wordt teruggezet"
+  overview-spawn-outside: "<red>(spawn buiten gebied)"
+  region-set: "{prefix}<green>Gebied van map <yellow>{map}</yellow> gezet: <white>{region}</white> <gray>({x}×{z}, hoogte {y})"
+  region-spawn-outside: "{prefix}<yellow>Let op: de spawn van {team} <yellow>ligt buiten dit gebied. Zet hem opnieuw."
+  region-cleared: "{prefix}<green>Gebied van map <yellow>{map}</yellow> verwijderd."
+  region-no-selection: "{prefix}<red>Selecteer eerst twee hoeken met FAWE (<yellow>//pos1</yellow> en <yellow>//pos2</yellow> of de wand)."
+  region-not-cuboid: "{prefix}<red>Alleen een rechthoekige selectie (cuboid) kan. Gebruik <yellow>//sel cuboid</yellow>."
+  no-worldedit: "{prefix}<red>FastAsyncWorldEdit/WorldEdit is niet gevonden."
+  restore-started: "{prefix}<gray>Map <yellow>{map}</yellow> wordt teruggezet..."
+  restore-done: "{prefix}<green>Map <yellow>{map}</yellow> is teruggezet."
+  restore-failed: "{prefix}<red>Terugzetten van <yellow>{map}</yellow> mislukt. Zie de console."
+  restore-none: "{prefix}<red>Er is geen momentopname van <yellow>{map}</yellow> om terug te zetten."
 
 lobby:
   welcome: "{prefix}<gray>Welkom in de OS-lobby! Kies een team met de blokken in je hotbar."
@@ -95,6 +109,8 @@ lobby:
   countdown-title: "<gold>{seconds}"
   countdown-cancelled: "{prefix}<red>Countdown afgebroken: niet genoeg spelers per team."
   countdown-already: "{prefix}<gray>De countdown loopt al."
+  preparing: "{prefix}<gray>Map <yellow>{map}</yellow> wordt klaargezet..."
+  prepare-failed: "{prefix}<red>De map kon niet worden klaargezet. De oorlog gaat niet door."
 
 match:
   started: "{prefix}<gold><bold>De oorlog is begonnen!</bold></gold> <gray>Map: <yellow>{map}"
@@ -123,6 +139,8 @@ match:
   damage-hearts: "{value} ❤"
   damage-hp: "{value} HP"
   rejoin-lobby: "{prefix}<gray>Je bent teruggezet naar de lobby."
+  border: "<red>Je kunt de map niet verlaten."
+  build-outside: "<red>Je kunt buiten de map niet bouwen of breken."
 
 kitpvp:
   welcome: "{prefix}<gray>Welkom in KitPvP! Iedereen tegen iedereen."

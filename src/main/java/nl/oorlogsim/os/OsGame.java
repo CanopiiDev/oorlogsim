@@ -48,6 +48,8 @@ public final class OsGame {
 
     private BukkitTask countdownTask, timeLimitTask, endTask;
     private int remaining;
+    private boolean shuttingDown;
+    private int prepareId;
 
     public OsGame(OorlogSim plugin) {
         this.plugin = plugin;
@@ -64,6 +66,12 @@ public final class OsGame {
     public MatchStats stats() { return stats; }
     public GameMap map() { return map; }
     public MapVote votes() { return votes; }
+
+    /** Gebied van de map waarop nu gespeeld wordt (alleen tijdens RUNNING/ENDING). */
+    public nl.oorlogsim.storage.Region activeRegion() {
+        GameMap m = map;
+        return isRunning() && m != null ? m.region() : null;
+    }
 
     /** Team van een speler: tijdens potje het deelnemersteam, anders het gekozen lobby-team. */
     public Optional<TeamId> teamOf(UUID id) {
@@ -144,7 +152,7 @@ public final class OsGame {
             plugin.messages().send(p, "lobby.match-running");
             return;
         }
-        if (state == OsState.COUNTDOWN) {
+        if (state == OsState.COUNTDOWN || state == OsState.PREPARING) {
             plugin.messages().send(p, "lobby.countdown-already");
             return;
         }
@@ -153,7 +161,7 @@ public final class OsGame {
 
     public boolean forceStart(CommandSender sender) {
         if (state != OsState.IDLE) {
-            plugin.messages().send(sender, state == OsState.COUNTDOWN ? "lobby.countdown-already" : "lobby.match-running");
+            plugin.messages().send(sender, state == OsState.COUNTDOWN || state == OsState.PREPARING ? "lobby.countdown-already" : "lobby.match-running");
             return false;
         }
         return startCountdown(sender, sender.getName());
@@ -168,7 +176,7 @@ public final class OsGame {
             plugin.messages().send(who, "lobby.not-enough-players", "min", String.valueOf(minTotal()));
             return false;
         }
-        if (plugin.maps().playable().isEmpty()) {
+        if (plugin.playableMaps().isEmpty()) {
             plugin.messages().send(who, "lobby.no-maps");
             return false;
         }
@@ -217,11 +225,11 @@ public final class OsGame {
         broadcastLobby(messageKey);
     }
 
-    private void tryStart() {
-        List<Player> players = lobbyPlayers();
+    /** Teams voor de huidige lobby-spelers, of null als een team te klein is. */
+    private Map<UUID, TeamId> assignTeams() {
         Map<UUID, TeamId> picked = new HashMap<>();
         List<UUID> free = new ArrayList<>();
-        for (Player p : players) {
+        for (Player p : lobbyPlayers()) {
             TeamId t = chosen.get(p.getUniqueId());
             if (t != null) picked.put(p.getUniqueId(), t);
             else free.add(p.getUniqueId());
@@ -229,23 +237,60 @@ public final class OsGame {
         Map<UUID, TeamId> teams = TeamAssigner.assign(picked, free, cfg().autoAssign, random);
         long kd1 = teams.values().stream().filter(t -> t == TeamId.KD1).count();
         long kd2 = teams.size() - kd1;
-        if (kd1 < cfg().minPlayersPerTeam || kd2 < cfg().minPlayersPerTeam) {
+        return kd1 < cfg().minPlayersPerTeam || kd2 < cfg().minPlayersPerTeam ? null : teams;
+    }
+
+    private void tryStart() {
+        if (assignTeams() == null) {
             cancelCountdown("lobby.countdown-cancelled");
             return;
         }
-        List<GameMap> playable = plugin.maps().playable();
-        List<String> ids = playable.stream().map(GameMap::id).toList();
+        List<String> ids = plugin.playableMaps().stream().map(GameMap::id).toList();
         Optional<String> winner = cfg().mapSelection == PluginConfig.MapSelection.VOTE
                 ? votes.winner(ids, random)
                 : (ids.isEmpty() ? Optional.empty() : Optional.of(ids.get(random.nextInt(ids.size()))));
         Optional<GameMap> chosenMap = winner.flatMap(plugin.maps()::get);
-        Location spawn1 = chosenMap.map(m -> m.spawn(TeamId.KD1)).map(StoredLocation::toLocation).orElse(null);
-        Location spawn2 = chosenMap.map(m -> m.spawn(TeamId.KD2)).map(StoredLocation::toLocation).orElse(null);
-        if (spawn1 == null || spawn2 == null) {
+        if (chosenMap.isEmpty()) {
             cancelCountdown("lobby.no-maps");
             return;
         }
-        start(chosenMap.get(), teams, spawn1, spawn2);
+        GameMap m = chosenMap.get();
+        boolean rollback = cfg().rollbackEnabled && plugin.rollback().available() && m.region() != null;
+        if (!rollback) {
+            if (cfg().rollbackEnabled && m.region() != null) {
+                plugin.getLogger().warning("Rollback staat aan maar WorldEdit/FAWE ontbreekt: map " + m.id() + " wordt niet teruggezet.");
+            }
+            launch(m);
+            return;
+        }
+        state = OsState.PREPARING;
+        int id = ++prepareId;
+        broadcastLobby("lobby.preparing", "map", m.displayName());
+        plugin.rollback().snapshot(m).whenComplete((ok, error) -> {
+            if (state != OsState.PREPARING || id != prepareId) { // gestopt tijdens het klaarzetten
+                if (error == null) plugin.rollback().discard(m);
+                return;
+            }
+            if (error != null) {
+                state = OsState.IDLE;
+                broadcastLobby("lobby.prepare-failed");
+                return;
+            }
+            launch(m);
+        });
+    }
+
+    /** Teams opnieuw bepalen (er kan iemand weg zijn) en het potje starten. */
+    private void launch(GameMap m) {
+        Map<UUID, TeamId> teams = assignTeams();
+        Location spawn1 = m.spawn(TeamId.KD1) == null ? null : m.spawn(TeamId.KD1).toLocation();
+        Location spawn2 = m.spawn(TeamId.KD2) == null ? null : m.spawn(TeamId.KD2).toLocation();
+        if (teams == null || spawn1 == null || spawn2 == null) {
+            if (state == OsState.PREPARING) plugin.rollback().discard(m);
+            cancelCountdown(teams == null ? "lobby.countdown-cancelled" : "lobby.no-maps");
+            return;
+        }
+        start(m, teams, spawn1, spawn2);
     }
 
     private void start(GameMap m, Map<UUID, TeamId> teams, Location spawn1, Location spawn2) {
@@ -274,6 +319,7 @@ public final class OsGame {
             plugin.kits().apply(KitType.OS, p);
             plugin.legacyPvp().update(p);
             plugin.stats().add(p.getUniqueId(), p.getName(), StatType.OS_GAMES, 1);
+            applyBorder(p);
             plugin.messages().send(p, "match.started", "map", m.displayName());
             if (cfg().titles) {
                 p.showTitle(Title.title(plugin.messages().get("match.start-title"),
@@ -320,6 +366,7 @@ public final class OsGame {
         } else {
             participants.remove(p.getUniqueId());
             plugin.names().clear(p);
+            clearBorder(p);
         }
         checkOutcome();
     }
@@ -333,6 +380,7 @@ public final class OsGame {
         } else {
             participants.remove(p.getUniqueId());
             plugin.names().clear(p);
+            clearBorder(p);
         }
     }
 
@@ -408,6 +456,7 @@ public final class OsGame {
         cancel(endTask);
         endTask = null;
         List<Player> online = onlineParticipants();
+        GameMap played = map;
         participants.clear();
         alive.clear();
         names.clear();
@@ -417,18 +466,37 @@ public final class OsGame {
         Location lobby = lobbySpawn();
         for (Player p : online) {
             plugin.names().clear(p);
+            clearBorder(p);
             if (lobby != null && p.getWorld().getName().equals(cfg().mapsWorld)) {
                 p.teleport(lobby);
             } else if (p.getWorld().getName().equals(cfg().lobbyWorld)) {
                 onEnterLobby(p);
             }
         }
+        // Bij afsluiten blijft de momentopname staan en wordt hij bij de volgende start teruggezet.
+        if (played != null && !shuttingDown && plugin.rollback().hasSnapshot(played.id())) {
+            plugin.rollback().restore(played, ok -> { });
+        }
+    }
+
+    private void applyBorder(Player p) {
+        nl.oorlogsim.storage.Region r = map == null ? null : map.region();
+        if (r == null || !cfg().borderEnabled || !cfg().borderVisual) return;
+        org.bukkit.WorldBorder border = Bukkit.createWorldBorder();
+        border.setCenter(r.centerX(), r.centerZ());
+        border.setSize(r.borderSize());
+        border.setWarningDistance(0);
+        p.setWorldBorder(border);
+    }
+
+    private static void clearBorder(Player p) {
+        if (p.getWorldBorder() != null) p.setWorldBorder(null);
     }
 
     /** Admin-stop: countdown of potje afbreken zonder winnaar. */
     public boolean stop() {
         switch (state) {
-            case COUNTDOWN -> {
+            case COUNTDOWN, PREPARING -> {
                 cancelCountdown("match.stopped");
                 return true;
             }
@@ -452,6 +520,7 @@ public final class OsGame {
 
     /** Bij uitschakelen van de plugin: iedereen netjes terug. */
     public void shutdown() {
+        shuttingDown = true;
         cancel(countdownTask);
         if (isRunning()) {
             state = OsState.ENDING;

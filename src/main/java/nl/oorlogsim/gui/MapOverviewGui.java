@@ -34,14 +34,18 @@ public final class MapOverviewGui extends Menu {
         inventory.clear();
         for (int i = 0; i < maps.size(); i++) {
             GameMap m = maps.get(i);
-            Material mat = !m.isReady() ? Material.RED_CONCRETE : m.enabled() ? Material.LIME_CONCRETE : Material.GRAY_CONCRETE;
+            boolean ready = m.isReady(plugin.cfg().requireRegion);
+            boolean restoring = plugin.rollback().isBusy(m);
+            Material mat = restoring ? Material.ORANGE_CONCRETE : !ready ? Material.RED_CONCRETE : m.enabled() ? Material.LIME_CONCRETE : Material.GRAY_CONCRETE;
             ItemStack it = new ItemStack(mat);
-            String status = m.isReady() ? msg.raw("admin.overview-ready") : msg.raw("admin.overview-missing");
+            String status = restoring ? msg.raw("admin.overview-restoring") : ready ? msg.raw("admin.overview-ready") : msg.raw("admin.overview-missing");
+            String regionText = m.region() == null ? msg.raw("admin.overview-cross") : msg.raw("admin.overview-check") + " <white>" + m.region().describe();
             List<Component> lore = msg.list("admin.overview-lore",
                     "team1", plugin.cfg().team(TeamId.KD1).display(),
                     "team2", plugin.cfg().team(TeamId.KD2).display(),
-                    "kd1", m.spawn(TeamId.KD1) != null ? msg.raw("admin.overview-check") : msg.raw("admin.overview-cross"),
-                    "kd2", m.spawn(TeamId.KD2) != null ? msg.raw("admin.overview-check") : msg.raw("admin.overview-cross"),
+                    "kd1", spawnText(m, TeamId.KD1),
+                    "kd2", spawnText(m, TeamId.KD2),
+                    "region", regionText,
                     "enabled", m.enabled() ? msg.raw("admin.overview-on") : msg.raw("admin.overview-off"));
             it.editMeta(meta -> {
                 meta.displayName(msg.parse("<yellow>" + m.displayName() + " <gray>(" + m.id() + ") " + status)
@@ -50,6 +54,12 @@ public final class MapOverviewGui extends Menu {
             });
             inventory.setItem(i, it);
         }
+    }
+
+    private String spawnText(GameMap m, TeamId t) {
+        Messages msg = plugin.messages();
+        if (m.spawn(t) == null) return msg.raw("admin.overview-cross");
+        return m.spawnInRegion(t) ? msg.raw("admin.overview-check") : msg.raw("admin.overview-check") + " " + msg.raw("admin.overview-spawn-outside");
     }
 
     public static void open(OorlogSim plugin, Player p) {

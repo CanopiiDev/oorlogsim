@@ -73,6 +73,16 @@ os:
     win: UI_TOAST_CHALLENGE_COMPLETE
   # Countdown-meldingen op deze seconden (en elke seconde onder de 5)
   announce-at: [30, 20, 10, 5, 4, 3, 2, 1]
+  # Een map is alleen speelbaar als er een gebied is gezet (/os admin setregion)
+  require-region: true
+  border:
+    # Muur om de map tijdens een potje: deelnemers kunnen de rand niet over
+    enabled: true
+    # Rode Minecraft-border tonen (altijd vierkant om de map heen)
+    visual: true
+  rollback:
+    # Map vlak voor het potje opslaan (FAWE) en na het potje terugzetten
+    enabled: true
 
 kitpvp:
   # Leven terug bij een kill

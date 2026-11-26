@@ -49,6 +49,16 @@ Gebruik een Paper 26.2-testserver met Multiverse, TAB, EssentialsX Chat en LuckP
 - Herstart de server. Verwacht: het bord staat er weer, zonder dubbele borden.
 - `/os stats A` laat de all-time stats van A zien.
 
+## 9. Map-gebied, border en rollback
+- Selecteer een rechthoekige map (bijv. 40×80) met `//pos1` en `//pos2`, en typ `/os admin setregion map1`. Verwacht: melding met de afmetingen. `/os admin maps` toont "Gebied ✔".
+- Zet een spawn buiten het gebied. Verwacht: de map is rood met "(spawn buiten gebied)" en doet niet mee aan de stemming.
+- Start een potje. Verwacht eerst "Map wordt klaargezet...", daarna de start. In `plugins/OorlogSim/snapshots/` staat `map1.schem`.
+- Loop tegen de rand aan, ook aan de korte kant, waar de rode border verder weg ligt. Verwacht: je komt er niet door, met een melding in de actiebalk.
+- Mine een blok onder de vloer van het gebied, of bouw een blok net buiten de rand. Verwacht: dat gaat niet. TNT bij de rand laat de blokken buiten het gebied heel.
+- Sloop iets binnen het gebied (met `allow-block-break: true`) en eindig het potje. Verwacht: na een paar seconden is de map exact terug, `map1.schem` is weg en er liggen geen items meer.
+- Typ `/os admin stop` tijdens "Map wordt klaargezet". Verwacht: er start niets en er blijft geen snapshot achter.
+- Stop de server hard tijdens een potje en start hem weer. Verwacht in de console "Achtergebleven momentopname gevonden, map ... wordt teruggezet", en de map is hersteld.
+
 ## Review Focus (randgevallen)
 1. Crash of herstart terwijl spelers in OorlogSim-werelden zitten → zie scenario 1.
 2. Uitloggen tijdens de countdown of het potje → scenario 2 en 4.

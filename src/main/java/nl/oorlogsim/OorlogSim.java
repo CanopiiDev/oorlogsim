@@ -50,6 +50,7 @@ public final class OorlogSim extends JavaPlugin {
     private OsGame os;
     private KitPvpManager kitpvp;
     private LegacyPvp legacyPvp;
+    private nl.oorlogsim.rollback.RollbackService rollback;
 
     @Override
     public void onEnable() {
@@ -63,6 +64,7 @@ public final class OorlogSim extends JavaPlugin {
         snapshots = new SnapshotStore(this);
         combat = new CombatTracker();
         stats = new StatsService(this);
+        rollback = new nl.oorlogsim.rollback.RollbackService(this);
         names = createNameService();
         legacyPvp = new LegacyPvp(this);
         os = new OsGame(this);
@@ -76,6 +78,9 @@ public final class OorlogSim extends JavaPlugin {
         pm.registerEvents(new KitPvpListener(this), this);
         pm.registerEvents(new LegacyPvpListener(this), this);
         pm.registerEvents(new MenuListener(), this);
+        pm.registerEvents(new nl.oorlogsim.os.MapBorderListener(this), this);
+        // Achtergebleven momentopnames (crash) terugzetten zodra alle werelden geladen zijn
+        Bukkit.getScheduler().runTaskLater(this, rollback::restorePending, 40L);
 
         OsCommand command = new OsCommand(this);
         PluginCommand pc = getCommand("os");
@@ -169,4 +174,10 @@ public final class OorlogSim extends JavaPlugin {
     public OsGame os() { return os; }
     public KitPvpManager kitpvp() { return kitpvp; }
     public LegacyPvp legacyPvp() { return legacyPvp; }
+    public nl.oorlogsim.rollback.RollbackService rollback() { return rollback; }
+
+    /** Maps die nu gestemd/gespeeld kunnen worden. */
+    public java.util.List<nl.oorlogsim.storage.GameMap> playableMaps() {
+        return maps.playable(cfg.requireRegion, rollback::isBusy);
+    }
 }

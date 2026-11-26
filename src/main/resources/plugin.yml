@@ -3,7 +3,7 @@ version: '${version}'
 main: nl.oorlogsim.OorlogSim
 api-version: '26.2'
 description: Oorlog Simulatie (Merovia vs Eldoria) en KitPvP
-softdepend: [TAB, PlaceholderAPI, Multiverse-Core]
+softdepend: [TAB, PlaceholderAPI, Multiverse-Core, FastAsyncWorldEdit, WorldEdit]
 commands:
   os:
     description: OorlogSim commando's

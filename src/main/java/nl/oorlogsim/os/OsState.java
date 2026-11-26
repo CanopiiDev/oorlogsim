@@ -1,3 +1,4 @@
 package nl.oorlogsim.os;
 
-public enum OsState { IDLE, COUNTDOWN, RUNNING, ENDING }
+/** PREPARING = map wordt klaargezet (momentopname) tussen countdown en start. */
+public enum OsState { IDLE, COUNTDOWN, PREPARING, RUNNING, ENDING }

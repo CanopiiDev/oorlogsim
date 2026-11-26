@@ -130,6 +130,16 @@ public final class OsCommand implements TabExecutor {
             }
             case "map" -> map(sender, a);
             case "setspawn" -> setSpawn(sender, a);
+            case "setregion" -> setRegion(sender, a);
+            case "clearregion" -> {
+                if (a.length < 2) { msg().sendList(sender, "help-admin"); return; }
+                Optional<GameMap> m = plugin.maps().get(a[1]);
+                if (m.isEmpty()) { msg().send(sender, "admin.map-unknown", "map", a[1]); return; }
+                m.get().region(null);
+                plugin.maps().save();
+                msg().send(sender, "admin.region-cleared", "map", m.get().id());
+            }
+            case "restore" -> restore(sender, a);
             case "tp" -> tp(sender, a);
             case "setlobby" -> setLobby(sender);
             case "setbutton" -> setButton(sender);
@@ -206,6 +216,52 @@ public final class OsCommand implements TabExecutor {
         m.spawn(team, StoredLocation.of(p.getLocation()));
         plugin.maps().save();
         msg().send(p, "admin.spawn-set", "team", plugin.cfg().team(team).display(), "map", m.id());
+    }
+
+    private void setRegion(CommandSender sender, String[] a) {
+        Player p = player(sender);
+        if (p == null) return;
+        if (a.length < 2) { msg().sendList(p, "help-admin"); return; }
+        if (!plugin.rollback().available()) { msg().send(p, "admin.no-worldedit"); return; }
+        if (!p.getWorld().getName().equals(plugin.cfg().mapsWorld)) {
+            msg().send(p, "admin.map-wrong-world", "world", plugin.cfg().mapsWorld);
+            return;
+        }
+        var sel = plugin.rollback().selection(p);
+        if (sel instanceof nl.oorlogsim.rollback.WorldEditBridge.Selection.NotCuboid) {
+            msg().send(p, "admin.region-not-cuboid");
+            return;
+        }
+        if (!(sel instanceof nl.oorlogsim.rollback.WorldEditBridge.Selection.Ok ok)) {
+            msg().send(p, "admin.region-no-selection");
+            return;
+        }
+        var r = ok.region();
+        GameMap m = plugin.maps().getOrCreate(a[1]);
+        m.region(r);
+        plugin.maps().save();
+        msg().send(p, "admin.region-set", "map", m.id(), "region", r.describe(),
+                "x", String.valueOf(r.maxX() - r.minX() + 1), "z", String.valueOf(r.maxZ() - r.minZ() + 1),
+                "y", String.valueOf(r.maxY() - r.minY() + 1));
+        for (TeamId t : TeamId.values()) {
+            if (m.spawn(t) != null && !m.spawnInRegion(t)) {
+                msg().send(p, "admin.region-spawn-outside", "team", plugin.cfg().team(t).display());
+            }
+        }
+    }
+
+    private void restore(CommandSender sender, String[] a) {
+        if (a.length < 2) { msg().sendList(sender, "help-admin"); return; }
+        Optional<GameMap> m = plugin.maps().get(a[1]);
+        if (m.isEmpty()) { msg().send(sender, "admin.map-unknown", "map", a[1]); return; }
+        if (!plugin.rollback().available()) { msg().send(sender, "admin.no-worldedit"); return; }
+        if (!plugin.rollback().hasSnapshot(m.get().id())) { msg().send(sender, "admin.restore-none", "map", m.get().id()); return; }
+        if (plugin.os().isRunning() && plugin.os().map() != null && plugin.os().map().id().equalsIgnoreCase(m.get().id())) {
+            msg().send(sender, "lobby.match-running");
+            return;
+        }
+        msg().send(sender, "admin.restore-started", "map", m.get().id());
+        plugin.rollback().restore(m.get(), ok -> msg().send(sender, ok ? "admin.restore-done" : "admin.restore-failed", "map", m.get().id()));
     }
 
     private void tp(CommandSender sender, String[] a) {
@@ -325,12 +381,12 @@ public final class OsCommand implements TabExecutor {
             String sub = args.length >= 2 ? args[1].toLowerCase(Locale.ROOT) : "";
             List<String> mapIds = plugin.maps().all().stream().map(GameMap::id).collect(Collectors.toList());
             if (args.length == 2) {
-                out.addAll(List.of("maps", "map", "setspawn", "tp", "setlobby", "setbutton", "setkit", "givekit", "kitpvp",
+                out.addAll(List.of("maps", "map", "setspawn", "setregion", "clearregion", "restore", "tp", "setlobby", "setbutton", "setkit", "givekit", "kitpvp",
                         "setleaderboard", "removeleaderboard", "leaderboards", "start", "stop", "reload"));
             } else if (args.length == 3) {
                 switch (sub) {
                     case "map" -> out.addAll(List.of("create", "delete", "enable", "disable", "rename"));
-                    case "setspawn", "tp" -> out.addAll(mapIds);
+                    case "setspawn", "tp", "setregion", "clearregion", "restore" -> out.addAll(mapIds);
                     case "setkit", "givekit" -> out.addAll(List.of("os", "kitpvp"));
                     case "kitpvp" -> out.addAll(List.of("addspawn", "clearspawns", "spawns"));
                     case "setleaderboard" -> Arrays.stream(LeaderboardType.values()).forEach(t -> out.add(t.id()));

@@ -16,7 +16,7 @@ Verder zit erin:
 ## Vereisten
 
 - Paper 26.2 met Java 25
-- Aanbevolen: **Multiverse-Core** (voor de werelden), **TAB** (voor de naamkleuren) en **PlaceholderAPI** (optioneel)
+- Aanbevolen: **Multiverse-Core** (voor de werelden), **FastAsyncWorldEdit** (voor map-gebieden en rollback), **TAB** (voor de naamkleuren) en **PlaceholderAPI** (optioneel)
 - Werkt samen met EssentialsX Chat en LuckPerms
 
 ## Installatie
@@ -34,7 +34,8 @@ Verder zit erin:
 |---|---|---|
 | Lobby-spawn | `/os admin setlobby` | in de lobby-wereld |
 | Startknop | `/os admin setbutton` | kijk naar een knop in de lobby |
-| Map-spawns | `/os admin setspawn map1 KD1` en `/os admin setspawn map1 KD2` | op de spawnplek in `os_maps` |
+| Map-gebied | selecteer de twee hoeken met FAWE (`//pos1`, `//pos2` of de wand), dan `/os admin setregion map1` | in `os_maps` |
+| Map-spawns | `/os admin setspawn map1 KD1` en `/os admin setspawn map1 KD2` (binnen het gebied) | op de spawnplek in `os_maps` |
 | OS-kit | vul je inventory (incl. armor en offhand), dan `/os admin setkit os` | maakt niet uit |
 | KitPvP-kit | vul je inventory, dan `/os admin setkit kitpvp` | maakt niet uit |
 | KitPvP-spawns | `/os admin kitpvp addspawn` (meerdere keren) | in de KitPvP-wereld |
@@ -42,7 +43,7 @@ Verder zit erin:
 
 Met `/os admin maps` open je het **overzicht van alle maps**:
 
-- 🟩 = klaar, 🟥 = er mist een spawn, ⬜ = map staat uit.
+- 🟩 = klaar, 🟥 = er mist een spawn of gebied (of een spawn ligt buiten het gebied), 🟧 = wordt teruggezet, ⬜ = map staat uit.
 - Linksklik brengt je naar KD1, rechtsklik naar KD2.
 - Shift-klik zet de map aan of uit.
 
@@ -66,6 +67,9 @@ Admins (`oorlogsim.admin`):
 | `/os admin map create\|delete\|enable\|disable <map>` | maps beheren |
 | `/os admin map rename <map> <naam...>` | weergavenaam |
 | `/os admin setspawn <map> <KD1\|KD2>` | spawn zetten (maakt de map aan als die nog niet bestaat) |
+| `/os admin setregion <map>` | map-gebied = je huidige FAWE-selectie (rechthoekig) |
+| `/os admin clearregion <map>` | gebied weghalen |
+| `/os admin restore <map>` | noodknop: map handmatig terugzetten als dat een keer mislukte |
 | `/os admin tp <map> <KD1\|KD2>` | naar een spawn |
 | `/os admin setlobby` / `setbutton` | lobby-spawn en startknop |
 | `/os admin setkit <os\|kitpvp>` | je inventory opslaan als kit |
@@ -100,6 +104,17 @@ Leaderboard-types: `top-kills`, `top-wins`, `top-damage`, `kitpvp-kills`, `kitpv
 8. Na 5 seconden gaat iedereen terug naar de lobby.
 
 Tijdens een OS ziet elk team alleen zijn eigen chat.
+
+## Map-gebied, border en rollback (FAWE)
+
+Elke map heeft een gebied, dat je zet met `/os admin setregion`. Tijdens een potje gebeurt dan het volgende:
+
+- **Border:** de rand is een muur, van de bodem tot de bouwlimiet. Je loopt ertegenaan en komt er niet door. Spelers zien de rode Minecraft-border, en de plugin blokkeert precies op de rand van je selectie.
+- **Niet uit de map:** blokken buiten het gebied kun je niet breken of plaatsen, dus ook niet eronder. Explosies, vloeistoffen, vuur en pistons raken niets buiten het gebied.
+- **Rollback:** vlak voor de start maakt FAWE een momentopname (`snapshots/<map>.schem`). Na het potje worden losse items, pijlen en TNT opgeruimd en wordt de map exact teruggezet. Zolang dat loopt, doet de map niet mee aan de stemming.
+- **Crash:** een achtergebleven momentopname wordt bij de volgende opstart vanzelf teruggezet.
+
+Je stelt dit in onder `os:` in `config.yml` (`require-region`, `border.enabled`, `border.visual`, `rollback.enabled`). Hiervoor heb je **FastAsyncWorldEdit** of WorldEdit nodig.
 
 ## Configuratie
 

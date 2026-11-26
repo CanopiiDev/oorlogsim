@@ -18,7 +18,7 @@ public final class MapVoteGui extends Menu {
 
     public MapVoteGui(OorlogSim plugin) {
         this.plugin = plugin;
-        this.maps = plugin.maps().playable().stream().limit(54).toList();
+        this.maps = plugin.playableMaps().stream().limit(54).toList();
         this.inventory = Bukkit.createInventory(this, rows(maps.size()) * 9, plugin.messages().get("lobby.vote-title"));
         for (int i = 0; i < maps.size(); i++) {
             GameMap m = maps.get(i);
@@ -33,7 +33,7 @@ public final class MapVoteGui extends Menu {
     }
 
     public static void open(OorlogSim plugin, Player p) {
-        if (plugin.maps().playable().isEmpty()) {
+        if (plugin.playableMaps().isEmpty()) {
             plugin.messages().send(p, "lobby.no-maps");
             return;
         }

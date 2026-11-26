@@ -34,6 +34,7 @@ public final class PluginConfig {
     public final DamageDisplay damageDisplay;
     public final Sound soundCountdown, soundStart, soundWin;
     public final Set<Integer> announceAt = new HashSet<>();
+    public final boolean requireRegion, borderEnabled, borderVisual, rollbackEnabled;
 
     public final boolean kitpvpHealOnKill, kitpvpBlockBreak, kitpvpBlockPlace, kitpvpHunger;
     public final int kitpvpAnnounceStreakFrom;
@@ -85,6 +86,10 @@ public final class PluginConfig {
         soundStart = sound(c.getString("os.sounds.start"), log);
         soundWin = sound(c.getString("os.sounds.win"), log);
         announceAt.addAll(c.getIntegerList("os.announce-at"));
+        requireRegion = c.getBoolean("os.require-region", true);
+        borderEnabled = c.getBoolean("os.border.enabled", true);
+        borderVisual = c.getBoolean("os.border.visual", true);
+        rollbackEnabled = c.getBoolean("os.rollback.enabled", true);
 
         kitpvpHealOnKill = c.getBoolean("kitpvp.heal-on-kill", false);
         kitpvpBlockBreak = c.getBoolean("kitpvp.allow-block-break", false);
